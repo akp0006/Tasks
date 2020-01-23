@@ -65,3 +65,77 @@ abline(h=mean(totalFeed), lty=2, col='red')
 dev.off()
 #Question2: Because the milk data was recorded at various times of day, multiple times per day while he was in daycare. The graph only shows the total milk per day and it doesn't account for the time of day, how much he had at each feeding, or how long he was actually in daycare to be fed.
 source("http://jonsmitchell.com/code/plotFxn02b.R")
+Naps <- which(beren3[,9] == "nap")
+beren4 <- beren3[Naps,]
+beren4
+class(beren4)
+napstart <- beren4[,5]
+napstartmin <- beren4[,6]
+NStimestamp <- paste(napstart, ":", napstartmin, sep="")
+NStimestamp
+sapply(strsplit(NStimestamp,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+napend <- beren4[,7]
+napendmin <- beren4[,8]
+NEtimestamp <- paste(napend,":", napendmin, sep="")
+sapply(strsplit(NEtimestamp,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+#I had to re-do this part because I didn't remove the rows with NAs (in the relevant columns) first.
+beren5 <- beren4
+beren4[complete.cases(beren4[ , 7:8]),]
+napstart2 <- beren4[,5]
+napstartmin2 <- beren4[,6]
+NStimestamp2 <- paste(napstart2, ":", napstartmin2, sep="")
+NStimestamp2
+sapply(strsplit(NStimestamp2,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+napend2 <- beren4[,7]
+napendmin2 <- beren4[,8]
+NEtimestamp2 <- paste(napend2,":", napendmin2, sep="")
+sapply(strsplit(NEtimestamp2,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+#and again because I forgot to add the beren4 changes to an object...
+beren6 <-  beren4[complete.cases(beren4[ , 7:8]),]
+napstart3 <- beren6[,5]
+napstartmin3 <- beren6[,6]
+NStimestamp3 <- paste(napstart3, ":", napstartmin3, sep="")
+NStimestamp3
+NS_dec <- sapply(strsplit(NStimestamp3,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+napend3 <- beren6[,7]
+napendmin3 <- beren6[,8]
+NEtimestamp3 <- paste(napend3,":", napendmin3, sep="")
+NE_dec <- sapply(strsplit(NEtimestamp3,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+NE_dec - NS_dec
+timeeachnap <- NE_dec - NS_dec
+beren7 <- cbind(beren6, timeeachnap) 
+totalNap <- tapply(beren7$timeeachnap, beren7$age, sum)
+plot(as.numeric(names(totalNap)), totalNap, type="b", pch=16, xlab="age in days", ylab="total time slept (hours)")
+beren8 <- cbind(beren7, NS_dec) 
+berenCorr <- cor.test(beren8$timeeachnap, beren8$NS_dec)
+#Step8: Given the p-value of 0.002, the test suggests that the time the nap starts and the nap's duration are significantly correlated. The correlation coefficient of -0.28 suggests that the correlation isn't particularly strong and that these two variables are negatively correlated--as one variable increases, the other decreases. 
