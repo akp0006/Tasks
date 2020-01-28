@@ -138,4 +138,73 @@ totalNap <- tapply(beren7$timeeachnap, beren7$age, sum)
 plot(as.numeric(names(totalNap)), totalNap, type="b", pch=16, xlab="age in days", ylab="total time slept (hours)")
 beren8 <- cbind(beren7, NS_dec) 
 berenCorr <- cor.test(beren8$timeeachnap, beren8$NS_dec)
-#Step8: Given the p-value of 0.002, the test suggests that the time the nap starts and the nap's duration are significantly correlated. The correlation coefficient of -0.28 suggests that the correlation isn't particularly strong and that these two variables are negatively correlated--as one variable increases, the other decreases. 
+#Step8: Given the p-value of 0.002, the test suggests that the time the nap starts and the nap's duration are significantly correlated. The correlation coefficient of -0.28 suggests that the correlation isn't particularly strong and that these two variables are negatively correlated--as one variable increases, the other decreases.
+
+#Hypothesis: Between the time 10:00am and 2:00pm, the amount of milk Beren drinks each day is positively correlated with the time he spends napping.
+setwd("C:\\Users\\Abbey\\Desktop\\Evolution\\Tasks\\Task_02")
+Data <- read.csv("http://jonsmitchell.com/data/beren.csv", stringsAsFactors=F)
+write.csv(Data, "rawdata.csv", quote=F)
+Data
+length(Data)
+nrow(Data)
+ncol(Data)
+colnames(Data)
+head(Data)
+Data[1,]
+Data[2,]
+Data[1:3,]
+Data[1:3, 4]
+Data[1:5, 1:3]
+Data[257, 1:3]
+Feeds <- which(Data[,9] == "bottle")
+berenMilk <- Data[Feeds,]
+head(berenMilk)
+Feeds <- which(Data[,"event"] == "bottle")
+Feeds <- which(Data$event == "bottle")
+dayID <- apply(Data, 1, function(x) paste(x[1:3], collapse="-"))
+dateID <- sapply(dayID, as.Date, format = "%Y-%m-%d", origin = "2019-04-18")
+Data$age <- dateID - dateID[which(Data$event == "birth")]
+head(Data)
+beren2 <- Data
+beren3 <- beren2[order(beren2$age),]
+totalFeed <- tapply(beren3$value[Feeds], beren3$age[Feeds], sum)
+Naps <- which(beren3[,9] == "nap")
+beren4 <- beren3[Naps,]
+beren6 <-  beren4[complete.cases(beren4[ , 7:8]),]
+napstart3 <- beren6[,5]
+napstartmin3 <- beren6[,6]
+NStimestamp3 <- paste(napstart3, ":", napstartmin3, sep="")
+NStimestamp3
+NS_dec <- sapply(strsplit(NStimestamp3,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+napend3 <- beren6[,7]
+napendmin3 <- beren6[,8]
+NEtimestamp3 <- paste(napend3,":", napendmin3, sep="")
+NE_dec <- sapply(strsplit(NEtimestamp3,":"),
+	function(x) {
+		x <- as.numeric(x)
+		x[1]+x[2]/60
+	}
+)
+NE_dec - NS_dec
+timeeachnap <- NE_dec - NS_dec
+beren7 <- cbind(beren6, timeeachnap) 
+totalNap <- tapply(beren7$timeeachnap, beren7$age, sum)
+beren_totalNap <- totalNap
+Beren_napsubsettime <- subset(beren4, start_hour >= 10 & start_hour < 14)
+nrow(Beren_napsubsettime)
+berenMilk2 <- which(beren3$event == "bottle")
+beren_Milk <- beren3[berenMilk2,]
+Beren_milksubsettime2 <- subset(beren_Milk, start_hour >= 10 & start_hour < 14)
+totalFeed2 <- tapply(Beren_milksubsettime2$value, Beren_milksubsettime2$age, sum)
+beren7_subsettime <- subset(beren7, start_hour >= 10 & start_hour < 14)
+totalNap2 <- tapply(beren7_subsettime$timeeachnap, beren7_subsettime$age, sum)
+TF2_matrix <- matrix(totalFeed2, ncol=1)
+TN2_matrix <- matrix(totalNap2, ncol=1)
+tN2_matrix <- TN2_matrix[c(1:41,44:61),]
+tF2_matrix <- TF2_matrix[c(1:18,21,24:25,28:29,31:41,45:48,50:70),]
+scatter.smooth(x=tN2_matrix, y=tF2_matrix, main="Milk consumption as a function of time napped", xlab="Time spent napping per day (hrs)", ylab="Milk consumed per day (oz)")
